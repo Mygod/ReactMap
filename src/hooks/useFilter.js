@@ -65,8 +65,10 @@ export function useFilter(category, webhookCategory, reqCategories) {
     Object.values(tempAdvFilter).every((val) => val === true)
   ) {
     switchKey = 'all'
-  } else if (others.selected) {
-    switchKey = 'selected'
+  } else if (others.selected && !others.unselected) {
+    // When Global Respect Selected is ON, we need to combine the advanced filters
+    // with the selected state check, not just use 'selected' mode alone
+    switchKey = 'selectedWithFilters'
   } else if (others.unselected) {
     switchKey = 'unselected'
   } else if (others.reverse) {
@@ -231,6 +233,42 @@ export function useFilter(category, webhookCategory, reqCategories) {
                       addItem(id)
                 }
               })
+              break
+            case 'selectedWithFilters':
+              // Global Respect Selected: combine Main/Extra filters with Select filter
+              if (tempFilters[id]?.enabled) {
+                if (
+                  filteringPokemon.includes(subCategory) ||
+                  item.webhookOnly
+                ) {
+                  if (
+                    ((tempAdvFilter.generations || generations[item.genId]) &&
+                      (tempAdvFilter.types || typeResolver(item.formTypes)) &&
+                      (tempAdvFilter.rarity ||
+                        rarity[item.rarity] ||
+                        Object.entries(rarity).some(
+                          ([k, v]) => v && item[k],
+                        )) &&
+                      (tempAdvFilter.historicRarity ||
+                        historicRarity[item.historic]) &&
+                      (tempAdvFilter.categories || categories[subCategory]) &&
+                      (tempAdvFilter.forms ||
+                        forms[item.formName] ||
+                        (forms.altForms && item.formId != item.defaultFormId) ||
+                        (forms.normalForms &&
+                          item.formId === item.defaultFormId))) ||
+                    item.webhookOnly
+                  ) {
+                    addItem(id)
+                  }
+                } else if (
+                  tempAdvFilter.categories ||
+                  categories[subCategory] ||
+                  item.webhookOnly
+                ) {
+                  addItem(id)
+                }
+              }
               break
             default:
               if (filteringPokemon.includes(subCategory)) {

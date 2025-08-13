@@ -67,12 +67,13 @@ function areaPerms(roles) {
           }
         }
 
-        // If neither areas nor parent are specified, allow all areas
+        // Only allow all areas if BOTH areas and parent are empty/undefined
+        // This maintains the original behavior where empty arrays mean "no restrictions"
         if (
-          (!restriction.areas || !restriction.areas.length) &&
-          (!restriction.parent || !restriction.parent.length)
+          (!restriction.areas || restriction.areas.length === 0) &&
+          (!restriction.parent || restriction.parent.length === 0)
         ) {
-          return []
+          return [] // Empty array means "allow all areas"
         }
       }
     }

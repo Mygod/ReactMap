@@ -96,19 +96,24 @@ const state = {
   /** @param {import('@rm/types').StateReportObj} [reloadReport] */
   async loadLocalContexts(reloadReport) {
     const promises = [this.event.cleanupTrials()]
-    if (!reloadReport || reloadReport.database) {
-      if (!reloadReport || reloadReport.historical) {
-        promises.push(this.db.historicalRarity())
-      }
-      promises.push(
-        this.db.getFilterContext(),
-        this.event.setAvailable('gyms', 'Gym', this.db),
-        this.event.setAvailable('pokestops', 'Pokestop', this.db),
-        this.event.setAvailable('pokemon', 'Pokemon', this.db),
-        this.event.setAvailable('nests', 'Nest', this.db),
-        this.event.setAvailable('stations', 'Station', this.db),
-      )
+    const shouldReloadHistorical =
+      !reloadReport ||
+      reloadReport.database ||
+      reloadReport.historical ||
+      reloadReport.masterfile
+
+    if (shouldReloadHistorical) {
+      promises.push(this.db.historicalRarity())
     }
+
+    promises.push(
+      this.db.getFilterContext(),
+      this.event.setAvailable('gyms', 'Gym', this.db),
+      this.event.setAvailable('pokestops', 'Pokestop', this.db),
+      this.event.setAvailable('pokemon', 'Pokemon', this.db),
+      this.event.setAvailable('nests', 'Nest', this.db),
+      this.event.setAvailable('stations', 'Station', this.db),
+    )
     await Promise.all(promises)
   },
   /** @param {import('@rm/types').StateReportObj} [reloadReport] */

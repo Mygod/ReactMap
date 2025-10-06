@@ -146,8 +146,8 @@ async function reloadConfig() {
     if (stateReport.database) {
       bindConnections(newState.db)
       await newState.db.getDbContext()
-      await newState.loadLocalContexts(stateReport)
     }
+    await newState.loadLocalContexts(stateReport)
     await newState.loadExternalContexts(stateReport)
 
     if (stateReport.strategies) {
